@@ -10,6 +10,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.sql.Date;
 
 
 @Entity
@@ -35,36 +36,33 @@ public class User{
     private String password;
 
     @NotBlank
-    private String firstName;
-
-    @NotBlank
-    private String lastName;
+    private String fullName;
 
     private String department;
+
+    private String position;
 
     @NotBlank
     private UserRole role;
 
     private String leaderEmail;
+    private Gender gender;
+    private Date hireDate;
 
 
-    public User(String firstName,
-                String lastName,
-                String email,
+    public User(String email,
                 String password,
+                String fullName,
                 String department,
+                String position,
                 UserRole role) {
 
-        this.firstName = firstName;
-        this.lastName = lastName;
+
         this.email = email;
         this.password = password;
+        this.fullName = fullName;
         this.department = department;
+        this.position = position;
         this.role = role;
     }
-
-//    List<GrantedAuthority> authorities = this.getRole().stream()
-//            .map(role -> new SimpleGrantedAuthority(role.getName().name()))
-//            .collect(Collectors.toList());
-
 }

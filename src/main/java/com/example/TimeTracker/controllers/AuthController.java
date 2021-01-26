@@ -1,13 +1,11 @@
 package com.example.TimeTracker.controllers;
 
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
-
 import com.example.TimeTracker.model.UserRole;
 import com.example.TimeTracker.model.User;
 import com.example.TimeTracker.payload.request.LoginRequest;
@@ -58,14 +56,18 @@ public class AuthController {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-
+        String gender = userDetails.getGender() == null ? null : userDetails.getGender().toString();
         return ResponseEntity.ok(new JwtResponse(jwt,
                 userDetails.getId(),
                 userDetails.getEmail(),
-                userDetails.getFirstName(),
-                userDetails.getLastName(),
+                userDetails.getFullName(),
+                userDetails.getDepartment(),
+                userDetails.getPosition(),
                 userDetails.getUserRole().toString(),
-                userDetails.getLeaderEmail()));
+                userDetails.getLeaderEmail(),
+                gender,
+                userDetails.getHireDate()
+                ));
     }
 
     @PostMapping("/signup")
@@ -77,13 +79,13 @@ public class AuthController {
         }
 
         // Create new user's account
-        UserRole userRole = signUpRequest.getRole().equals("LEADER") ? UserRole.LEADER : UserRole.EMPLOYEE;
+        UserRole userRole = signUpRequest.getRole().equals("leader") ? UserRole.LEADER : UserRole.EMPLOYEE;
         User user = new User(
-                signUpRequest.getFirstName(),
-                signUpRequest.getLastName(),
                 signUpRequest.getEmail(),
                 encoder.encode(signUpRequest.getPassword()),
+                signUpRequest.getFullName(),
                 signUpRequest.getDepartment(),
+                signUpRequest.getPosition(),
                 userRole
         );
 
