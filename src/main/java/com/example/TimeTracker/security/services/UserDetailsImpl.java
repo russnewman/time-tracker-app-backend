@@ -1,7 +1,7 @@
 package com.example.TimeTracker.security.services;
 
 import com.example.TimeTracker.model.Gender;
-import com.example.TimeTracker.model.User;
+import com.example.TimeTracker.model.Person;
 import com.example.TimeTracker.model.UserRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
@@ -59,22 +59,22 @@ public class UserDetailsImpl implements UserDetails {
         this.gender = gender;
     }
 
-    public static UserDetailsImpl build(User user) {
+    public static UserDetailsImpl build(Person person) {
         SimpleGrantedAuthority authorities =
-                new SimpleGrantedAuthority(user.getRole().name());
+                new SimpleGrantedAuthority(person.getRole().name());
 
 
         return new UserDetailsImpl(
-                user.getId(),
-                user.getEmail(),
-                user.getPassword(),
-                user.getFullName(),
-                user.getDepartment(),
-                user.getPosition(),
-                user.getRole(),
-                user.getLeaderEmail(),
-                user.getGender(),
-                user.getHireDate(),
+                person.getId(),
+                person.getEmail(),
+                person.getPassword(),
+                person.getFullName(),
+                person.getDepartment(),
+                person.getPosition(),
+                person.getRole(),
+                person.getLeaderEmail(),
+                person.getGender(),
+                person.getHireDate(),
                 Collections.singletonList(authorities));
     }
 

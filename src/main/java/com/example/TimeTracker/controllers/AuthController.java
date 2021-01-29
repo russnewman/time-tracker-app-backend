@@ -1,26 +1,19 @@
 package com.example.TimeTracker.controllers;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import javax.validation.Valid;
 import com.example.TimeTracker.model.UserRole;
-import com.example.TimeTracker.model.User;
+import com.example.TimeTracker.model.Person;
 import com.example.TimeTracker.payload.request.LoginRequest;
 import com.example.TimeTracker.payload.request.SignupRequest;
-import com.example.TimeTracker.payload.response.JwtResponse;
 import com.example.TimeTracker.payload.response.MessageResponse;
-import com.example.TimeTracker.repository.UserRepository;
-import com.example.TimeTracker.security.services.UserDetailsImpl;
+import com.example.TimeTracker.repository.PersonRepository;
 import com.example.TimeTracker.security.services.jwt.JwtUtils;
+import com.example.TimeTracker.service.InitResponseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,7 +30,7 @@ public class AuthController {
     AuthenticationManager authenticationManager;
 
     @Autowired
-    UserRepository userRepository;
+    PersonRepository personRepository;
 
     @Autowired
     PasswordEncoder encoder;
@@ -45,34 +38,39 @@ public class AuthController {
     @Autowired
     JwtUtils jwtUtils;
 
+    @Autowired
+    InitResponseService initResponseService;
+
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
+        return ResponseEntity.ok(initResponseService.init(authentication));
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-
-        String gender = userDetails.getGender() == null ? null : userDetails.getGender().toString();
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getEmail(),
-                userDetails.getFullName(),
-                userDetails.getDepartment(),
-                userDetails.getPosition(),
-                userDetails.getUserRole().toString(),
-                userDetails.getLeaderEmail(),
-                gender,
-                userDetails.getHireDate()
-                ));
+//        SecurityContextHolder.getContext().setAuthentication(authentication);
+//        String jwt = jwtUtils.generateJwtToken(authentication);
+//
+//        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+//
+//        String gender = userDetails.getGender() == null ? null : userDetails.getGender().toString();
+//        return ResponseEntity.ok(new UserInfoResponse(jwt,
+//                userDetails.getId(),
+//                userDetails.getEmail(),
+//                userDetails.getFullName(),
+//                userDetails.getDepartment(),
+//                userDetails.getPosition(),
+//                userDetails.getUserRole().toString(),
+//                userDetails.getLeaderEmail(),
+//                gender,
+//                userDetails.getHireDate()
+//                ));
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+        if (personRepository.existsByEmail(signUpRequest.getEmail())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Email is already in use!"));
@@ -80,7 +78,7 @@ public class AuthController {
 
         // Create new user's account
         UserRole userRole = signUpRequest.getRole().equals("leader") ? UserRole.LEADER : UserRole.EMPLOYEE;
-        User user = new User(
+        Person person = new Person(
                 signUpRequest.getEmail(),
                 encoder.encode(signUpRequest.getPassword()),
                 signUpRequest.getFullName(),
@@ -89,7 +87,7 @@ public class AuthController {
                 userRole
         );
 
-        userRepository.save(user);
+        personRepository.save(person);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }

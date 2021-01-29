@@ -12,12 +12,9 @@ import java.sql.Date;
 
 @Getter
 @AllArgsConstructor
-public class UpdateRequest {
+public class PersonInfo {
     @NotBlank
     private String email;
-
-    @NotBlank
-    private String password;
 
     @NotBlank
     private String fullName;

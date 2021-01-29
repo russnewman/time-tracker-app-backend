@@ -21,7 +21,7 @@ import java.sql.Date;
 @NoArgsConstructor
 @Getter
 @Setter
-public class User{
+public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -50,12 +50,12 @@ public class User{
     private Date hireDate;
 
 
-    public User(String email,
-                String password,
-                String fullName,
-                String department,
-                String position,
-                UserRole role) {
+    public Person(String email,
+                  String password,
+                  String fullName,
+                  String department,
+                  String position,
+                  UserRole role) {
 
 
         this.email = email;
