@@ -1,5 +1,6 @@
 package com.example.TimeTracker.service;
 import com.example.TimeTracker.exception.IncorrectPasswordException;
+import com.example.TimeTracker.exception.UserAlreadyExistException;
 import com.example.TimeTracker.exception.UserNotFoundException;
 import com.example.TimeTracker.model.Gender;
 import com.example.TimeTracker.model.Person;
@@ -20,32 +21,20 @@ public class PersonService {
     @Autowired
     PasswordEncoder encoder;
 
-    public void updateInfo(PersonInfo personInfo) throws UserNotFoundException {
-        Person person = personRepository.findByEmail(personInfo.getEmail()).orElseThrow();
+    public void updateInfo(PersonInfo personInfo) throws UserAlreadyExistException {
 
-        //TO DO Check that if new email is not equal old email, that new email doesnt exist in db
-
-        person.setEmail(personInfo.getEmail());
+        Person person = personRepository.findById(personInfo.getId()).orElseThrow();
+        if(!person.getEmail().equals(personInfo.getEmail())){
+            boolean existByEmail = personRepository.existsByEmail(personInfo.getEmail());
+            if (existByEmail){
+                throw new UserAlreadyExistException("This email is already in use!");
+            }
+            person.setEmail(personInfo.getEmail());
+        }
         person.setFullName(personInfo.getFullName());
         person.setDepartment(personInfo.getDepartment());
         person.setPosition(personInfo.getPosition());
         if (personInfo.getGender() != null) person.setGender(Gender.valueOf(personInfo.getGender()));
-
-        String leaderEmail = personInfo.getLeaderEmail();
-        if (leaderEmail != null && !leaderEmail.equals("")){
-            boolean existByEmail =  personRepository.existsByEmail(leaderEmail);
-            //TO DO Check that person with leaderEmail has a role "LEADER"
-            if(!existByEmail) {
-                throw new UserNotFoundException("Leader email does not exist");
-            }
-        }
-        if (leaderEmail.equals("")) {
-            person.setLeaderEmail(null);
-        } else {
-            person.setLeaderEmail(leaderEmail);
-        }
-//        else user.setLeaderEmail(leaderEmail);
-
         person.setHireDate(personInfo.getHireDate());
         personRepository.save(person);
     }
@@ -64,7 +53,6 @@ public class PersonService {
 
     }
 
-
     public void updateEmployee(PersonInfo personInfo){
         Person person = personRepository.findByEmail(personInfo.getEmail()).orElseThrow(()->new UsernameNotFoundException("User not found"));
         person.setDepartment(personInfo.getDepartment());
@@ -76,11 +64,24 @@ public class PersonService {
         personRepository.save(person);
     }
 
+
     public void deleteEmployee(Long employeeId){
         Person person = personRepository.findById(employeeId).orElseThrow(()->new UsernameNotFoundException("User not found"));
-        person.setLeaderEmail(null);
+        person.setManagerId(null);
         personRepository.save(person);
 
     }
+
+    public void addOrDeleteManager(Long userId, Long managerId){
+        Person person = personRepository.findById(userId).orElseThrow();
+        person.setManagerId(managerId);
+        personRepository.save(person);
+    }
+
+//    public void deleteManager(Long userId){
+//        Person person = personRepository.findById(userId).orElseThrow();
+//        person.setManagerId(null);
+//        personRepository.save(person);
+//    }
 
 }

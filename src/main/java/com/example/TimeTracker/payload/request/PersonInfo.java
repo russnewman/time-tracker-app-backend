@@ -1,7 +1,7 @@
 package com.example.TimeTracker.payload.request;
 
 
-import com.example.TimeTracker.model.UserRole;
+//import com.example.TimeTracker.model.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -13,6 +13,8 @@ import java.sql.Date;
 @Getter
 @AllArgsConstructor
 public class PersonInfo {
+
+    private Long id;
     @NotBlank
     private String email;
 
@@ -24,7 +26,7 @@ public class PersonInfo {
     @NotBlank
     private String userRole;
 
-    private String leaderEmail;
+    private Long managerId;
     private String gender;
     private Date hireDate;
 }

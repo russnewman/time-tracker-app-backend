@@ -1,4 +1,4 @@
-package com.example.TimeTracker.controllers;
+package com.example.TimeTracker.controller;
 
 import javax.validation.Valid;
 import com.example.TimeTracker.model.UserRole;
@@ -48,24 +48,6 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
         return ResponseEntity.ok(initResponseService.init(authentication));
-
-//        SecurityContextHolder.getContext().setAuthentication(authentication);
-//        String jwt = jwtUtils.generateJwtToken(authentication);
-//
-//        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-//
-//        String gender = userDetails.getGender() == null ? null : userDetails.getGender().toString();
-//        return ResponseEntity.ok(new UserInfoResponse(jwt,
-//                userDetails.getId(),
-//                userDetails.getEmail(),
-//                userDetails.getFullName(),
-//                userDetails.getDepartment(),
-//                userDetails.getPosition(),
-//                userDetails.getUserRole().toString(),
-//                userDetails.getLeaderEmail(),
-//                gender,
-//                userDetails.getHireDate()
-//                ));
     }
 
     @PostMapping("/signup")
@@ -89,6 +71,11 @@ public class AuthController {
 
         personRepository.save(person);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(signUpRequest.getEmail(), signUpRequest.getPassword()));
+
+        return ResponseEntity.ok(initResponseService.init(authentication));
+
+//        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 }

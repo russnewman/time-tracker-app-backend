@@ -45,9 +45,11 @@ public class Person {
     @NotBlank
     private UserRole role;
 
-    private String leaderEmail;
+    private Long managerId;
     private Gender gender;
     private Date hireDate;
+
+
 
 
     public Person(String email,

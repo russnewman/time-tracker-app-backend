@@ -28,7 +28,7 @@ public class UserDetailsImpl implements UserDetails {
     private String department;
     private String position;
     private UserRole userRole;
-    private String leaderEmail;
+    private Long managerId;
     private Gender gender;
     private Date hireDate;
 
@@ -42,7 +42,7 @@ public class UserDetailsImpl implements UserDetails {
                            String department,
                            String position,
                            UserRole userRole,
-                           String leaderEmail,
+                           Long managerId,
                            Gender gender,
                            Date hireDate,
                            Collection<? extends GrantedAuthority> authorities) {
@@ -53,7 +53,7 @@ public class UserDetailsImpl implements UserDetails {
         this.department = department;
         this.position = position;
         this.userRole = userRole;
-        this.leaderEmail = leaderEmail;
+        this.managerId = managerId;
         this.authorities = authorities;
         this.hireDate = hireDate;
         this.gender = gender;
@@ -72,7 +72,7 @@ public class UserDetailsImpl implements UserDetails {
                 person.getDepartment(),
                 person.getPosition(),
                 person.getRole(),
-                person.getLeaderEmail(),
+                person.getManagerId(),
                 person.getGender(),
                 person.getHireDate(),
                 Collections.singletonList(authorities));

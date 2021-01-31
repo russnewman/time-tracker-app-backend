@@ -17,7 +17,7 @@ public class UserInfoResponse {
 	private String department;
 	private String position;
 	private String userRole;
-	private String leaderEmail;
+	private Long managerId;
 	private String gender;
 	private Date hireDate;
 }

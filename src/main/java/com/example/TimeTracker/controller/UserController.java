@@ -1,10 +1,9 @@
-package com.example.TimeTracker.controllers;
+package com.example.TimeTracker.controller;
 
 import com.example.TimeTracker.exception.IncorrectPasswordException;
-import com.example.TimeTracker.exception.UserNotFoundException;
+import com.example.TimeTracker.exception.UserAlreadyExistException;
 import com.example.TimeTracker.payload.request.UpdatePasswordRequest;
 import com.example.TimeTracker.payload.request.PersonInfo;
-import com.example.TimeTracker.service.EmployeeService;
 import com.example.TimeTracker.service.PersonService;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,7 @@ public class UserController {
         try {
             personService.updateInfo(personInfo);
             return ResponseEntity.ok("Updated successfully!");
-        } catch (UserNotFoundException e) {
+        } catch (UserAlreadyExistException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -54,6 +53,23 @@ public class UserController {
     public ResponseEntity<?> deleteEmployee(@RequestBody JsonNode body){
         Long employeeId = body.get("employeeId").asLong();
         personService.deleteEmployee(employeeId);
+        return ResponseEntity.ok("Deleted successfully!");
+    }
+
+
+
+    @PostMapping("/addManager")
+    public ResponseEntity<?> addManager(@RequestBody JsonNode body){
+        Long userId = body.get("userId").asLong();
+        Long managerId = body.get("managerId").asLong();
+        personService.addOrDeleteManager(userId, managerId);
+        return ResponseEntity.ok("Add successfully!");
+    }
+
+    @PostMapping("/deleteManager")
+    public ResponseEntity<?> deleteManager(@RequestBody JsonNode body){
+        Long userId = body.get("userId").asLong();
+        personService.addOrDeleteManager(userId, null);
         return ResponseEntity.ok("Deleted successfully!");
     }
 }
