@@ -1,5 +1,6 @@
 package com.example.TimeTracker.repository;
 
+import com.example.TimeTracker.dto.PersonInfo;
 import com.example.TimeTracker.model.Manager;
 import com.example.TimeTracker.model.Person;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface PersonRepository extends JpaRepository<Person, Long> {
+
     Optional<Person> findById(Long id);
     Optional<Person> findByEmail(String email);
     Boolean existsByEmail(String email);

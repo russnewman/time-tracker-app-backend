@@ -2,6 +2,7 @@ package com.example.TimeTracker.model;
 
 
 
+import com.example.TimeTracker.dto.PersonInfo;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -59,12 +60,25 @@ public class Person {
                   String position,
                   UserRole role) {
 
-
         this.email = email;
         this.password = password;
         this.fullName = fullName;
         this.department = department;
         this.position = position;
         this.role = role;
+    }
+
+    public PersonInfo toPersonInfo(){
+        return PersonInfo.builder()
+                .id(this.getId())
+                .email(this.getEmail())
+                .fullName(this.getFullName())
+                .department(this.getDepartment())
+                .position(this.getPosition())
+                .gender(this.getGender() == null ? null : this.getGender().toString())
+                .managerId(this.getManagerId())
+                .hireDate(this.getHireDate())
+                .userRole(this.getRole().toString())
+                .build();
     }
 }

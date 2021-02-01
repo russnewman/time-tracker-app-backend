@@ -1,4 +1,4 @@
-package com.example.TimeTracker.payload.response;
+package com.example.TimeTracker.dto;
 
 public class MessageResponse {
 	private String message;

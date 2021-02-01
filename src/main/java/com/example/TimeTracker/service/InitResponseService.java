@@ -2,8 +2,8 @@ package com.example.TimeTracker.service;
 
 import com.example.TimeTracker.model.Manager;
 import com.example.TimeTracker.model.Person;
-import com.example.TimeTracker.payload.response.InitResponse;
-import com.example.TimeTracker.payload.response.UserInfoResponse;
+import com.example.TimeTracker.dto.InitResponse;
+import com.example.TimeTracker.dto.PersonInfo;
 import com.example.TimeTracker.repository.PersonRepository;
 import com.example.TimeTracker.security.services.UserDetailsImpl;
 import com.example.TimeTracker.security.services.jwt.JwtUtils;
@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,47 +29,47 @@ public class InitResponseService {
         String jwt = jwtUtils.generateJwtToken(authentication);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        UserInfoResponse userInfoResponse = InitUserInfo(jwt, userDetails);
+        PersonInfo personInfo = InitUserInfo(jwt, userDetails);
 
         if (userDetails.getUserRole().toString().equals("LEADER")) {
-            List<Person> employees = personRepository.findAllByManagerId(userDetails.getId());
+            List<PersonInfo> employees = personRepository.findAllByManagerId(userDetails.getId())
+                    .stream()
+                    .map(Person::toPersonInfo)
+                    .collect(Collectors.toList());
+
             return InitResponse.builder()
-                    .userInfoResponse(userInfoResponse)
+                    .personInfo(personInfo)
                     .employees(employees)
                     .build();
         }
-        List<Manager> managers = personRepository.findAllManagers()
+        List<PersonInfo> managers = personRepository.findAllManagers()
                 .stream()
-                .map(elem -> new Manager(
-                        elem.getId(),
-                        elem.getEmail(),
-                        elem.getFullName(),
-                        elem.getDepartment(),
-                        elem.getPosition())
-                )
+                .map(Person::toPersonInfo)
                 .collect(Collectors.toList());
 
         Long managerId = userDetails.getManagerId();
-        Person manager = managerId == null ? null : personRepository.findById(managerId).orElseThrow();
+        PersonInfo manager = managerId == null ? null : personRepository.findById(managerId).orElseThrow().toPersonInfo();
         return InitResponse.builder()
-                .userInfoResponse(userInfoResponse)
+                .personInfo(personInfo)
                 .managers(managers)
                 .userManager(manager)
                 .build();
     }
 
-    private UserInfoResponse InitUserInfo(String jwt, UserDetailsImpl userDetails) {
+    private PersonInfo InitUserInfo(String jwt, UserDetailsImpl userDetails) {
         String gender = userDetails.getGender() == null ? null : userDetails.getGender().toString();
-        return new UserInfoResponse(jwt,
-                userDetails.getId(),
-                userDetails.getEmail(),
-                userDetails.getFullName(),
-                userDetails.getDepartment(),
-                userDetails.getPosition(),
-                userDetails.getUserRole().toString(),
-                userDetails.getManagerId(),
-                gender,
-                userDetails.getHireDate()
-        );
+        return  PersonInfo
+                .builder()
+                .token(jwt)
+                .id(userDetails.getId())
+                .email(userDetails.getEmail())
+                .fullName(userDetails.getFullName())
+                .department(userDetails.getDepartment())
+                .position(userDetails.getPosition())
+                .userRole(userDetails.getUserRole().toString())
+                .managerId(userDetails.getManagerId())
+                .gender(gender)
+                .hireDate(userDetails.getHireDate())
+                .build();
     }
 }

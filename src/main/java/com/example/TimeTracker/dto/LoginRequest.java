@@ -1,4 +1,4 @@
-package com.example.TimeTracker.payload.request;
+package com.example.TimeTracker.dto;
 
 import lombok.Getter;
 import lombok.Setter;
