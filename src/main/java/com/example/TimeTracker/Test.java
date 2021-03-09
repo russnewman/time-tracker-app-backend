@@ -1,16 +1,14 @@
 package com.example.TimeTracker;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 
-@Component
+import java.time.LocalDateTime;
+import java.util.Date;
+
 public class Test {
     public static void main(String[] args) {
-
-//        PasswordEncoder encoder;
-//        String s1 = "qwerty";
-//        encoder.encode(s1);
-
+        Date date = new Date();
+        LocalDateTime localDateTime = LocalDateTime.now();
+        System.out.println(date.getTime());
+        System.out.println(localDateTime);
     }
 }

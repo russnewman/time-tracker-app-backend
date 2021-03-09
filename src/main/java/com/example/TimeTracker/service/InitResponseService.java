@@ -1,6 +1,5 @@
 package com.example.TimeTracker.service;
 
-import com.example.TimeTracker.model.Manager;
 import com.example.TimeTracker.model.Person;
 import com.example.TimeTracker.dto.InitResponse;
 import com.example.TimeTracker.dto.PersonInfo;
@@ -22,6 +21,10 @@ public class InitResponseService {
 
     @Autowired
     PersonRepository personRepository;
+//    @Autowired
+//    LogsRepository logsRepository;
+//    @Autowired
+//    EmployeeRepository employeeRepository;
 
     public InitResponse init(Authentication authentication) {
 //        List<Person> employees = new ArrayList<>();
@@ -58,6 +61,13 @@ public class InitResponseService {
 
     private PersonInfo InitUserInfo(String jwt, UserDetailsImpl userDetails) {
         String gender = userDetails.getGender() == null ? null : userDetails.getGender().toString();
+//        System.out.println("SDASDA");
+//        System.out.println(logsRepository.findByUser(employeeRepository.findByNickname("user")));
+//        System.out.println("SDASDA");
+//        System.out.println(employeeRepository.findByNickname("user").getLogs());
+//        System.out.println(logsRepository.findById(2L).get().getStart());
+//        System.out.println(logsRepository.findById(2L).get().getTabName());
+
         return  PersonInfo
                 .builder()
                 .token(jwt)

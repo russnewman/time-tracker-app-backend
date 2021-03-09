@@ -1,27 +1,25 @@
 package com.example.TimeTracker.model;
 
-
-
 import com.example.TimeTracker.dto.PersonInfo;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.sql.Date;
+import java.util.List;
 
 
 @Entity
-@Table(	name = "users",
+@Table(	name = "logs_user",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = "email")
         })
+@Data
 @NoArgsConstructor
-@Getter
-@Setter
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,14 +41,12 @@ public class Person {
 
     private String position;
 
-    @NotBlank
+    @NotNull
     private UserRole role;
 
     private Long managerId;
     private Gender gender;
     private Date hireDate;
-
-
 
 
     public Person(String email,

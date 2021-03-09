@@ -75,7 +75,5 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(signUpRequest.getEmail(), signUpRequest.getPassword()));
 
         return ResponseEntity.ok(initResponseService.init(authentication));
-
-//        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 }

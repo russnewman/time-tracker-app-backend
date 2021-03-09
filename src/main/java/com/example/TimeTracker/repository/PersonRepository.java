@@ -1,7 +1,6 @@
 package com.example.TimeTracker.repository;
 
-import com.example.TimeTracker.dto.PersonInfo;
-import com.example.TimeTracker.model.Manager;
+
 import com.example.TimeTracker.model.Person;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,7 +17,7 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
     Boolean existsByEmail(String email);
     List<Person> findAllByManagerId(Long managerId);
 
-    @Query(value = "SELECT * FROM users u WHERE u.role = 0",
+    @Query(value = "SELECT * FROM logs_user u WHERE u.role = 0",
             nativeQuery = true)
     List<Person> findAllManagers();
 

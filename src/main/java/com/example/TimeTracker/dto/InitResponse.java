@@ -22,7 +22,7 @@ public class InitResponse {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<PersonInfo> employees;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(JsonInclude.Include.NON_NULL)  
 //    @JsonProperty("managers")
     private List<PersonInfo> managers;
 
