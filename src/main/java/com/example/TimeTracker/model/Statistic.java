@@ -1,7 +1,10 @@
 package com.example.TimeTracker.model;
 
 import com.example.TimeTracker.service.Impl.Utils;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -9,6 +12,9 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "Statistics")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Statistic {
 
     @Id
@@ -36,17 +42,17 @@ public class Statistic {
 
 
 
-    public Statistic(Person user,
-                     LocalDate date,
-                     int[] effective,
-                     int[] neutral,
-                     int[] ineffective,
-                     int[] without){
-        this.user = user;
-        this.date = date;
-        this.effective = Utils.convertIntegersToBytes(effective);
-        this.neutral = Utils.convertIntegersToBytes(neutral);
-        this.ineffective = Utils.convertIntegersToBytes(ineffective);
-        this.without = Utils.convertIntegersToBytes(without);
-    }
+//    public Statistic(Person user,
+//                     LocalDate date,
+//                     int[] effective,
+//                     int[] neutral,
+//                     int[] ineffective,
+//                     int[] without){
+//        this.user = user;
+//        this.date = date;
+//        this.effective = Utils.convertIntegersToBytes(effective);
+//        this.neutral = Utils.convertIntegersToBytes(neutral);
+//        this.ineffective = Utils.convertIntegersToBytes(ineffective);
+//        this.without = Utils.convertIntegersToBytes(without);
+//    }
 }

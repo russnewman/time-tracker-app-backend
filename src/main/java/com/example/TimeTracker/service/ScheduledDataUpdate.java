@@ -6,6 +6,7 @@ import com.example.TimeTracker.model.Person;
 import com.example.TimeTracker.model.Statistic;
 import com.example.TimeTracker.repository.PersonRepository;
 import com.example.TimeTracker.repository.StatisticRepository;
+import com.example.TimeTracker.service.Impl.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ import java.util.List;
 public class ScheduledDataUpdate {
 
     @Autowired
-    LogsService logsService;
+    EfficiencyService efficiencyService;
 
     @Autowired
     StatisticRepository statisticRepository;
@@ -32,15 +33,16 @@ public class ScheduledDataUpdate {
         List<Person> users = personRepository.findAll();
 
         for (Person user: users){
-            HashMap<Category, int[]> categoryHashMap = logsService.computeEfficiencyByUserAndDate(user.getId(), currentDate);
-            Statistic statistic = new Statistic(user, currentDate,
-                    categoryHashMap.get(Category.EFFECTIVE),
-                    categoryHashMap.get(Category.NEUTRAL),
-                    categoryHashMap.get(Category.INEFFECTIVE),
-                    categoryHashMap.get(Category.WITHOUT));
-
+            HashMap<Category, int[]> categoryHashMap = efficiencyService.computeEfficiencyByUserAndDate(user.getId(), currentDate);
+            Statistic statistic = Statistic.builder()
+                        .user(user)
+                        .date(currentDate)
+                        .effective(Utils.convertIntegersToBytes(categoryHashMap.get(Category.EFFECTIVE)))
+                        .neutral(Utils.convertIntegersToBytes(categoryHashMap.get(Category.NEUTRAL)))
+                        .ineffective(Utils.convertIntegersToBytes(categoryHashMap.get(Category.INEFFECTIVE)))
+                        .without(Utils.convertIntegersToBytes(categoryHashMap.get(Category.WITHOUT)))
+                        .build();
             statisticRepository.save(statistic);
-
         }
     }
 }

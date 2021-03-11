@@ -21,6 +21,7 @@ public class Utils {
 
 
     public static int[] byte2int(byte[]src) {
+        if (src == null) return null;
         int dstLength = src.length >>> 2;
         int[]dst = new int[dstLength];
 
