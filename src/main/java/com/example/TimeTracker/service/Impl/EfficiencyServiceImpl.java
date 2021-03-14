@@ -7,6 +7,8 @@ import com.example.TimeTracker.repository.PersonRepository;
 import com.example.TimeTracker.repository.SiteRepository;
 import com.example.TimeTracker.repository.StatisticRepository;
 import com.example.TimeTracker.service.EfficiencyService;
+import com.example.TimeTracker.service.LogsService;
+import com.example.TimeTracker.service.ResourcesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,14 +27,13 @@ import java.util.List;
 public class EfficiencyServiceImpl implements EfficiencyService {
 
     @Autowired
-    private LogsRepository logsRepository;
+    LogsRepository logsRepository;
     @Autowired
-    private PersonRepository personRepository;
+    PersonRepository personRepository;
     @Autowired
-    private SiteRepository siteRepository;
-
+    SiteRepository siteRepository;
     @Autowired
-    private StatisticRepository statisticRepository;
+    LogsService logsService;
 
     //TODO Case when log.getEnd can be null
     @Override
@@ -43,52 +44,38 @@ public class EfficiencyServiceImpl implements EfficiencyService {
         HashMap<Category, int[]> result = new HashMap<>();
         Person person = personRepository.findById(userId).orElseThrow();
 
-        if (date.equals(LocalDate.now())) {
+//        if (date.equals(LocalDate.now())) {
             return computeEfficiencyByUserAndDateViaLogs(person, date);
-        }
-        else{
+//        }
+//        else{
 //            Statistic statistic = statisticRepository.findByUserAndDate(person, date)
-//                    .orElse(Statistic.builder()
-//                            .effective(new byte[0])
-//                            .neutral(new byte[0])
-//                            .ineffective(new byte[0])
-//                            .without(new byte[0])
-//                            .build());
-
-
-
-
-            Statistic statistic = statisticRepository.findByUserAndDate(person, date)
-                    .orElse(Statistic.builder()
-                            .effective(new byte[0])
-                            .neutral(new byte[0])
-                            .ineffective(new byte[0])
-                            .without(new byte[0])
-                            .build());
-
-
-
-            result.put(Category.WITHOUT, Utils.byte2int(statistic.getWithout()));
-            result.put(Category.EFFECTIVE, Utils.byte2int(statistic.getWithout()));
-            result.put(Category.NEUTRAL, Utils.byte2int(statistic.getWithout()));
-            result.put(Category.INEFFECTIVE, Utils.byte2int(statistic.getWithout()));
-
-            return result;
-        }
+//                    .orElseGet(()-> Statistic.builder()
+//                                    .effective(new byte[0])
+//                                    .neutral(new byte[0])
+//                                    .ineffective(new byte[0])
+//                                    .without(new byte[0])
+//                                    .build());
+//
+//
+//
+//            result.put(Category.WITHOUT, Utils.byte2int(statistic.getWithout()));
+//            result.put(Category.EFFECTIVE, Utils.byte2int(statistic.getWithout()));
+//            result.put(Category.NEUTRAL, Utils.byte2int(statistic.getWithout()));
+//            result.put(Category.INEFFECTIVE, Utils.byte2int(statistic.getWithout()));
+//
+//            return result;
+//        }
     }
 
-
-
-
-
-    private HashMap<Category, int[]> computeEfficiencyByUserAndDateViaLogs(Person person, LocalDate date){
+    @Override
+    public HashMap<Category, int[]> computeEfficiencyByUserAndDateViaLogs(Person person, LocalDate date){
 
         HashMap<Category, int[]> result = new HashMap<>();
 
         LocalDateTime beginOfTheDay = getBeginOfTheDay(date);
         LocalDateTime endOfTheDay = getEndOfTheDay(date);
 
-        List<Log> logsPerDay = logsRepository.findByUserAndStartBetweenOrEndBetween(person.getId(), beginOfTheDay, endOfTheDay);
+        List<Log> logsPerDay = logsRepository.findLogsByIdAndTwoPointsOfTime(person.getId(), beginOfTheDay, endOfTheDay);
 
 
         int[] effective = new int[24];
@@ -96,18 +83,7 @@ public class EfficiencyServiceImpl implements EfficiencyService {
         int[] ineffective = new int[24];
         int[] without = new int[24];
         for (Log log : logsPerDay) {
-            Site site = siteRepository.findByResourceNameAndPerson(extractResourceName(log.getUrl()), person)
-                    .orElseGet(() -> {
-                                Site site1 = Site.builder()
-                                        .category(Category.WITHOUT)
-                                        .resourceName(extractResourceName(log.getUrl()))
-                                        .protocolIdentifier(extractProtocolIdentifier(log.getUrl()))
-                                        .person(person)
-                                        .build();
-                                siteRepository.save(site1);
-                                return site1;
-                            }
-                    );
+            Site site = logsService.getSiteByUrl(log, person);
 
             LocalDateTime beginLogDay = date.getDayOfMonth() == log.getStart().getDayOfMonth() ? log.getStart()
                     : LocalDateTime.of(date, LocalTime.of(0, 0, 0));
@@ -125,7 +101,7 @@ public class EfficiencyServiceImpl implements EfficiencyService {
                 endLogHour = h == endLogDay.getHour() ? endLogDay :
                         LocalDateTime.of(date, LocalTime.of(h, 59, 59));
 
-                int diffSeconds = (int) ChronoUnit.SECONDS.between(beginLogHour, endLogHour);
+                int diffSeconds = (int) ChronoUnit.SECONDS.between(beginLogHour, endLogHour) + 1;
 
                 switch (site.getCategory()) {
                     case WITHOUT:
@@ -148,7 +124,6 @@ public class EfficiencyServiceImpl implements EfficiencyService {
         result.put(Category.NEUTRAL, neutral);
         result.put(Category.INEFFECTIVE, ineffective);
         return result;
-
     }
 
     @Override
@@ -156,6 +131,7 @@ public class EfficiencyServiceImpl implements EfficiencyService {
 
         HashMap<Long, HashMap<String,HashMap<Category, int[]>>> result = new HashMap<>();
         List<Person> employees = personRepository.findAllByManagerId(userId);
+        employees.add(personRepository.findById(userId).orElseThrow());
 
         employees.forEach((employee) -> {
                     result.put(employee.getId(), computeEfficiencyEmployee(employee.getId(), date, periodOfTime));
@@ -178,8 +154,7 @@ public class EfficiencyServiceImpl implements EfficiencyService {
         }
         else if (periodOfTime.equals(PeriodOfTime.WEEK)) {
 
-            int dayOfWeek = date.getDayOfWeek().getValue();
-            LocalDate beginWeek = date.minusDays(dayOfWeek - 1);
+            LocalDate beginWeek = date.minusDays(date.getDayOfWeek().getValue() - 1);
             LocalDate endWeek = beginWeek.plusDays(6);
             endWeek = endWeek.isBefore(LocalDate.now()) ? endWeek : LocalDate.now();
 
@@ -202,6 +177,7 @@ public class EfficiencyServiceImpl implements EfficiencyService {
         result.put("Previous", efficiencyPreviousPeriod);
         return result;
     }
+
 
     private HashMap<Category, int[]> computeEfficiencyEmployee(Long employeeId, LocalDate beginDate, LocalDate endDate, int numberOfDays){
         HashMap<Category, int[]> result = new HashMap<>();
@@ -231,26 +207,6 @@ public class EfficiencyServiceImpl implements EfficiencyService {
 
         return result;
     }
-
-    private String extractResourceName(String url) {
-        try {
-            URL url1 = new URL(url);
-            return url1.getHost();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-    private String extractProtocolIdentifier(String url) {
-        try {
-            URL url1 = new URL(url);
-            return url1.getProtocol();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
 
     private LocalDateTime getBeginOfTheDay(LocalDate date) {
         return LocalDateTime.of(

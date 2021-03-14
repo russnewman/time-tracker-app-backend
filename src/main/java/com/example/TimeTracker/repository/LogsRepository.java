@@ -15,10 +15,13 @@ public interface LogsRepository extends JpaRepository<Log, Long> {
     List<Log> findByUserAndStartBetween(Person user, LocalDateTime start, LocalDateTime end);
 
 
-    @Query(value = "SELECT * FROM logs_log l WHERE l.user_id = ?1 " +
-            "AND ((l.start between ?2 AND ?3) OR (l.end between ?2 AND ?3) OR (l.start < ?2 AND l.end > ?3))",
+    @Query(value = "" +
+            "SELECT * FROM logs_log l " +
+            "WHERE l.user_id = ?1 " +
+            "AND ((l.start between ?2 AND ?3) OR (l.end between ?2 AND ?3) OR (l.start < ?2 AND l.end > ?3))" +
+            "ORDER BY l.start",
             nativeQuery = true)
-    List<Log> findByUserAndStartBetweenOrEndBetween(Long id, LocalDateTime start, LocalDateTime end);
+    List<Log> findLogsByIdAndTwoPointsOfTime(Long id, LocalDateTime start, LocalDateTime end);
 
 
 }

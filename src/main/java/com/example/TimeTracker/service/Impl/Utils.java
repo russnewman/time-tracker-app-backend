@@ -2,6 +2,9 @@ package com.example.TimeTracker.service.Impl;
 
 import org.springframework.stereotype.Service;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 public class Utils {
     public static byte[] convertIntegersToBytes(int[] integers) {
         if (integers != null) {
@@ -35,5 +38,26 @@ public class Utils {
             dst[i] = x;
         }
         return dst;
+    }
+
+
+    public static String extractResourceName(String url) {
+        try {
+            URL url1 = new URL(url);
+            return url1.getHost();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String extractProtocolIdentifier(String url) {
+        try {
+            URL url1 = new URL(url);
+            return url1.getProtocol();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
