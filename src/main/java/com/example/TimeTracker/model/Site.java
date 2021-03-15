@@ -23,7 +23,7 @@ public class Site {
     private String protocolIdentifier;
 
     @Column(name = "resource_name")
-    private String resourceName;
+    private String host;
 
     @Column
     private Category category;

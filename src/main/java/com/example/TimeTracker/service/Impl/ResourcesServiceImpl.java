@@ -3,6 +3,7 @@ package com.example.TimeTracker.service.Impl;
 
 import com.example.TimeTracker.dto.PeriodOfTime;
 import com.example.TimeTracker.dto.Resource;
+import com.example.TimeTracker.model.Category;
 import com.example.TimeTracker.model.Log;
 import com.example.TimeTracker.model.Person;
 import com.example.TimeTracker.model.Site;
@@ -103,6 +104,42 @@ public class ResourcesServiceImpl implements ResourcesService {
 
         });
         return getResultListFromMap(hostToResource);
+    }
+
+
+    @Override
+    public void changeCategory(Long employeeId, String host, Category category) {
+        Person person = personRepository.findById(employeeId).orElseThrow();
+        Site site = siteRepository.findByHostAndPerson(host, person).orElseThrow();
+        site.setCategory(category);
+        siteRepository.save(site);
+    }
+
+    @Override
+    public void addResourceWithCategory(Long employeeId, String url, Category category) {
+        Person person = personRepository.findById(employeeId).orElseThrow();
+        Site site = Site
+                .builder()
+                .host(Utils.extractResourceName(url))
+                .protocolIdentifier(Utils.extractProtocolIdentifier(url))
+                .category(category)
+                .person(person)
+                .build();
+        siteRepository.save(site);
+    }
+
+    @Override
+    public void changeCategoryForTeam(Long managerId, String host, Category category) {
+        List<Person> employees = personRepository.findAllByManagerId(managerId);
+        employees.add(personRepository.findById(managerId).orElseThrow());
+        employees.forEach(employee -> changeCategory(employee.getId(), host, category));
+    }
+
+    @Override
+    public void addResourceWithCategoryForTeam(Long managerId, String url, Category category) {
+        List<Person> employees = personRepository.findAllByManagerId(managerId);
+        employees.add(personRepository.findById(managerId).orElseThrow());
+        employees.forEach(employee -> addResourceWithCategory(employee.getId(), url, category));
     }
 
 

@@ -6,7 +6,6 @@ import com.example.TimeTracker.model.Log;
 import com.example.TimeTracker.model.Person;
 import com.example.TimeTracker.model.Site;
 import com.example.TimeTracker.repository.LogsRepository;
-import com.example.TimeTracker.repository.PersonRepository;
 import com.example.TimeTracker.repository.SiteRepository;
 import com.example.TimeTracker.service.LogsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +22,11 @@ public class LogsServiceImpl implements LogsService {
 
 
     public Site getSiteByUrl(Log log, Person person){
-        return siteRepository.findByResourceNameAndPerson(Utils.extractResourceName(log.getUrl()), person)
+        return siteRepository.findByHostAndPerson(Utils.extractResourceName(log.getUrl()), person)
                 .orElseGet(() -> {
                             Site site1 = Site.builder()
                                     .category(Category.WITHOUT)
-                                    .resourceName(Utils.extractResourceName(log.getUrl()))
+                                    .host(Utils.extractResourceName(log.getUrl()))
                                     .protocolIdentifier(Utils.extractProtocolIdentifier(log.getUrl()))
                                     .person(person)
                                     .build();
