@@ -5,15 +5,12 @@ import com.example.TimeTracker.model.*;
 import com.example.TimeTracker.repository.LogsRepository;
 import com.example.TimeTracker.repository.PersonRepository;
 import com.example.TimeTracker.repository.SiteRepository;
-import com.example.TimeTracker.repository.StatisticRepository;
+
 import com.example.TimeTracker.service.EfficiencyService;
 import com.example.TimeTracker.service.LogsService;
-import com.example.TimeTracker.service.ResourcesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -35,6 +32,8 @@ public class EfficiencyServiceImpl implements EfficiencyService {
     @Autowired
     LogsService logsService;
 
+    private static final LocalDate staticDate = LocalDate.now();
+
     //TODO Case when log.getEnd can be null
     @Override
     public HashMap<Category, int[]> computeEfficiencyByUserAndDate(Long userId, LocalDate date) {
@@ -44,31 +43,16 @@ public class EfficiencyServiceImpl implements EfficiencyService {
         HashMap<Category, int[]> result = new HashMap<>();
         Person person = personRepository.findById(userId).orElseThrow();
 
-//        if (date.equals(LocalDate.now())) {
             return computeEfficiencyByUserAndDateViaLogs(person, date);
-//        }
-//        else{
-//            Statistic statistic = statisticRepository.findByUserAndDate(person, date)
-//                    .orElseGet(()-> Statistic.builder()
-//                                    .effective(new byte[0])
-//                                    .neutral(new byte[0])
-//                                    .ineffective(new byte[0])
-//                                    .without(new byte[0])
-//                                    .build());
-//
-//
-//
-//            result.put(Category.WITHOUT, Utils.byte2int(statistic.getWithout()));
-//            result.put(Category.EFFECTIVE, Utils.byte2int(statistic.getWithout()));
-//            result.put(Category.NEUTRAL, Utils.byte2int(statistic.getWithout()));
-//            result.put(Category.INEFFECTIVE, Utils.byte2int(statistic.getWithout()));
-//
-//            return result;
-//        }
     }
 
     @Override
     public HashMap<Category, int[]> computeEfficiencyByUserAndDateViaLogs(Person person, LocalDate date){
+
+        String key = "eff" + person.getEmail() + date.toString();
+        if (EfficiencyCache.isCached(key)){
+            return EfficiencyCache.getByKey(key);
+        }
 
         HashMap<Category, int[]> result = new HashMap<>();
 
@@ -76,7 +60,6 @@ public class EfficiencyServiceImpl implements EfficiencyService {
         LocalDateTime endOfTheDay = getEndOfTheDay(date);
 
         List<Log> logsPerDay = logsRepository.findLogsByIdAndTwoPointsOfTime(person.getId(), beginOfTheDay, endOfTheDay);
-
 
         int[] effective = new int[24];
         int[] neutral = new int[24];
@@ -123,6 +106,9 @@ public class EfficiencyServiceImpl implements EfficiencyService {
         result.put(Category.EFFECTIVE, effective);
         result.put(Category.NEUTRAL, neutral);
         result.put(Category.INEFFECTIVE, ineffective);
+
+        if (date.isBefore(LocalDate.now())) EfficiencyCache.add(key, result);
+
         return result;
     }
 
@@ -131,7 +117,7 @@ public class EfficiencyServiceImpl implements EfficiencyService {
 
         HashMap<Long, HashMap<String,HashMap<Category, int[]>>> result = new HashMap<>();
         List<Person> employees = personRepository.findAllByManagerId(userId);
-        employees.add(personRepository.findById(userId).orElseThrow());
+//        employees.add(personRepository.findById(userId).orElseThrow());
 
         employees.forEach((employee) -> {
                     result.put(employee.getId(), computeEfficiencyEmployee(employee.getId(), date, periodOfTime));
@@ -173,8 +159,8 @@ public class EfficiencyServiceImpl implements EfficiencyService {
              efficiencyPreviousPeriod =
                     computeEfficiencyEmployee(employeeId, beginMonth.minusMonths(1), beginMonth.minusDays(1), numberOfDaysInMonth);
         }
-        result.put("Current", efficiency);
-        result.put("Previous", efficiencyPreviousPeriod);
+        result.put("current", efficiency);
+        result.put("previous", efficiencyPreviousPeriod);
         return result;
     }
 

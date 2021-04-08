@@ -13,6 +13,7 @@ import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/resources")
+@CrossOrigin(origins="*")
 public class ResourceController {
 
     @Autowired
@@ -33,6 +34,13 @@ public class ResourceController {
             @RequestParam String date,
             @RequestParam String periodOfTime){
         return ResponseEntity.ok(resourcesService.getResourcesForEmployee(employeeId, LocalDate.parse(date), PeriodOfTime.of(periodOfTime)));
+    }
+
+
+    @GetMapping("/employee/withCategory")
+    public ResponseEntity<?> getResourcesWithCategory(
+            @RequestParam Long employeeId){
+        return ResponseEntity.ok(resourcesService.getResourcesWithCategoryForEmployee(employeeId));
     }
 
 

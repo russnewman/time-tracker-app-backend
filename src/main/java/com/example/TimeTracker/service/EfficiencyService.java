@@ -1,6 +1,7 @@
 package com.example.TimeTracker.service;
 
 import com.example.TimeTracker.dto.PeriodOfTime;
+import com.example.TimeTracker.dto.PersonInfo;
 import com.example.TimeTracker.model.Category;
 import com.example.TimeTracker.model.Person;
 

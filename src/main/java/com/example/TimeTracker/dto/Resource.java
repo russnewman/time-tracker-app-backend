@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
 
 
 @Data
@@ -19,10 +17,15 @@ import java.util.Objects;
 @Builder
 public class Resource {
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Long employeeId;
+
+
     private String host;
     private String protocolIdentifier;
-    private Category category;
+    private String category;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private HashMap<String, String> urlToTabName;
 
 
@@ -32,9 +35,11 @@ public class Resource {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private LocalDateTime endTime;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer activity;
 
-    private int activity;
-    private long duration;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Long duration;
 
 //    @Override
 //    public boolean equals(Object o) {

@@ -48,7 +48,7 @@ public class ResourcesServiceImpl implements ResourcesService {
             getResourcesForEmployee(employee.getId(), date, periodOfTime).forEach(resource -> {
 
                 if (result.get(resource.getHost()) != null) result.get(resource.getHost()).add(resource);
-                else result.put(resource.getHost(), new ArrayList<>(){{
+                else result.put(resource.getHost(), new ArrayList<>() {{
                     add(resource);
                 }});
             });
@@ -58,6 +58,13 @@ public class ResourcesServiceImpl implements ResourcesService {
 
     @Override
     public List<Resource> getResourcesForEmployee(Long employeeId, LocalDate date, PeriodOfTime periodOfTime) {
+
+        Person person = personRepository.findById(employeeId).orElseThrow();
+        String key = person.getEmail() + date.toString();
+        if (date.isBefore(LocalDate.now()) && ResourceCache.isCached(key)){
+            return ResourceCache.getByKey(key);
+        }
+
         LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.of(0, 0, 0));
 
         if (periodOfTime.equals(PeriodOfTime.DAY)) {
@@ -80,7 +87,6 @@ public class ResourcesServiceImpl implements ResourcesService {
             resourceList = getListOfResources(employeeId, beginMonth, endMonth);
         }
 
-        List<Resource> result = new ArrayList<>();
         HashMap<String, Resource> hostToResource = new HashMap<>();
 
         resourceList.forEach(resource -> {
@@ -103,13 +109,36 @@ public class ResourcesServiceImpl implements ResourcesService {
             hostToResource.put(resource.getHost(), newResource);
 
         });
-        return getResultListFromMap(hostToResource);
+        List<Resource> result = getResultListFromMap(hostToResource);
+
+        if (date.isBefore(LocalDate.now())) ResourceCache.add("resource" + key, result);
+        return result;
+    }
+
+    @Override
+    public List<Resource> getResourcesWithCategoryForEmployee(Long employeeId) {
+        List<Resource> result = new ArrayList<>();
+        Person person = personRepository.findById(employeeId).orElseThrow();
+        siteRepository.findAllByPerson(person)
+                .stream()
+                .filter(site -> site.getCategory() != Category.WITHOUT)
+                .forEach(site -> {
+            result.add(
+                    Resource.builder()
+                            .host(site.getHost())
+                            .protocolIdentifier(site.getProtocolIdentifier())
+                            .category(site.getCategory().getValue())
+                            .build()
+            );
+        });
+        return result;
     }
 
 
     @Override
     public void changeCategory(Long employeeId, String host, Category category) {
         Person person = personRepository.findById(employeeId).orElseThrow();
+        Cache.evict(person.getEmail());
         Site site = siteRepository.findByHostAndPerson(host, person).orElseThrow();
         site.setCategory(category);
         siteRepository.save(site);
@@ -118,14 +147,22 @@ public class ResourcesServiceImpl implements ResourcesService {
     @Override
     public void addResourceWithCategory(Long employeeId, String url, Category category) {
         Person person = personRepository.findById(employeeId).orElseThrow();
-        Site site = Site
-                .builder()
-                .host(Utils.extractResourceName(url))
-                .protocolIdentifier(Utils.extractProtocolIdentifier(url))
-                .category(category)
-                .person(person)
-                .build();
-        siteRepository.save(site);
+        Optional<Site> optSite = siteRepository.findByHostAndPerson(Utils.extractResourceName(url), person);
+        optSite.ifPresentOrElse(
+                site -> {
+                    site.setCategory(category);
+                    siteRepository.save(site);
+                    Cache.evict(person.getEmail());
+                },
+                () -> {
+                    siteRepository.save(Site
+                            .builder()
+                            .host(Utils.extractResourceName(url))
+                            .protocolIdentifier(Utils.extractProtocolIdentifier(url))
+                            .category(category)
+                            .person(person)
+                            .build());
+                });
     }
 
     @Override
@@ -157,8 +194,10 @@ public class ResourcesServiceImpl implements ResourcesService {
                     .employeeId(log.getUser().getId())
                     .host(Utils.extractResourceName(log.getUrl()))
                     .protocolIdentifier(Utils.extractProtocolIdentifier(log.getUrl()))
-                    .category(site.getCategory())
-                    .urlToTabName(new HashMap<>(){{put(log.getUrl(), log.getTabName());}})
+                    .category(site.getCategory().getValue())
+                    .urlToTabName(new HashMap<>() {{
+                        put(log.getUrl(), log.getTabName());
+                    }})
                     .startTime(startResourceTime)
                     .endTime(endResourceTime)
                     .duration(ChronoUnit.SECONDS.between(startResourceTime, endResourceTime))
@@ -169,7 +208,7 @@ public class ResourcesServiceImpl implements ResourcesService {
     }
 
 
-    private List<Resource> getResultListFromMap(HashMap<String,Resource> hostToResource){
+    private List<Resource> getResultListFromMap(HashMap<String, Resource> hostToResource) {
 
         List<Resource> result = new ArrayList<>(hostToResource.values());
 
