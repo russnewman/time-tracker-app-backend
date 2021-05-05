@@ -14,7 +14,7 @@ import java.util.List;
 
 
 @Entity
-@Table(	name = "logs_user",
+@Table(	name = "users",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = "email")
         })

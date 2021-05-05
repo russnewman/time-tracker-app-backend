@@ -1,39 +1,41 @@
 package com.example.TimeTracker.model;
 
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name="logs_log")
+@Table(name="logs", uniqueConstraints = {@UniqueConstraint(columnNames = {"user", "startDateTime"})})
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Log {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(nullable=false)
     private String browser;
 
     @ManyToOne
     @JoinColumn(name="user_id")
     private Person user;
 
-    @Column
-    private LocalDateTime start;
+    @Column(nullable=false)
+    private LocalDateTime startDateTime;
 
     @Column
-    private LocalDateTime end;
+    private LocalDateTime endDateTime;
 
-    @Column(name="tab_name")
+    @Column(nullable=false)
     private String tabName;
 
-    @Column
+    @Column(nullable=false, length=512)
     private String url;
 
-    @Column
-    private boolean background;
+    @Column(nullable=false)
+    private Boolean background;
 }
