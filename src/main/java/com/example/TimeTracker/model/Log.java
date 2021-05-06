@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name="logs", uniqueConstraints = {@UniqueConstraint(columnNames = {"user", "startDateTime"})})
+@Table(name="logs", uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "startDateTime"})})
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

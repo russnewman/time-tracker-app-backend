@@ -65,9 +65,10 @@ public class LogController {
         Log prevLog = logsRepository
                 .findFirstByUserAndStartDateTimeBeforeOrderByStartDateTimeDesc(user_optional.get(), startDateTime);
 
-        prevLog.setEndDateTime(startDateTime);
-        logsRepository.save(prevLog);
-
+        if (prevLog != null) {
+            prevLog.setEndDateTime(startDateTime);
+            logsRepository.save(prevLog);
+        }
         return ResponseEntity.ok("");
     }
 }
