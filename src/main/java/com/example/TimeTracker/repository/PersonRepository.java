@@ -17,7 +17,7 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
     Boolean existsByEmail(String email);
     List<Person> findAllByManagerId(Long managerId);
 
-    @Query(value = "SELECT * FROM logs_user u WHERE u.role = 0",
+    @Query(value = "SELECT * FROM users u WHERE u.role = 0",
             nativeQuery = true)
     List<Person> findAllManagers();
 

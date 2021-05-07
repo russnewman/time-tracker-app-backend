@@ -11,7 +11,7 @@ public enum PeriodOfTime {
 
     DAY("day"),
     WEEK("week"),
-    MOUNTH("month");
+    MONTH("month");
 
     @Getter
     private String value;

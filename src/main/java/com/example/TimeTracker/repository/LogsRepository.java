@@ -12,14 +12,15 @@ import java.util.List;
 @Repository
 public interface LogsRepository extends JpaRepository<Log, Long> {
 
-    List<Log> findByUserAndStartBetween(Person user, LocalDateTime start, LocalDateTime end);
+    List<Log> findByUserAndStartDateTimeBetween(Person user, LocalDateTime start, LocalDateTime end);
 
+    Log findFirstByUserAndStartDateTimeBeforeOrderByStartDateTimeDesc(Person user, LocalDateTime dateTime);
 
     @Query(value = "" +
-            "SELECT * FROM logs_log l " +
+            "SELECT * FROM logs l " +
             "WHERE l.user_id = ?1 " +
-            "AND ((l.start between ?2 AND ?3) OR (l.end between ?2 AND ?3) OR (l.start < ?2 AND l.end > ?3))" +
-            "ORDER BY l.start",
+            "AND ((l.start_date_time between ?2 AND ?3) OR (l.end_date_time between ?2 AND ?3) OR (l.start_date_time < ?2 AND l.end_date_time > ?3))" +
+            "ORDER BY l.start_date_time",
             nativeQuery = true)
     List<Log> findLogsByIdAndTwoPointsOfTime(Long id, LocalDateTime start, LocalDateTime end);
 

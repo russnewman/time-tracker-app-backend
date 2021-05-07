@@ -68,10 +68,10 @@ public class EfficiencyServiceImpl implements EfficiencyService {
         for (Log log : logsPerDay) {
             Site site = logsService.getSiteByUrl(log, person);
 
-            LocalDateTime beginLogDay = date.getDayOfMonth() == log.getStart().getDayOfMonth() ? log.getStart()
+            LocalDateTime beginLogDay = date.getDayOfMonth() == log.getStartDateTime().getDayOfMonth() ? log.getStartDateTime()
                     : LocalDateTime.of(date, LocalTime.of(0, 0, 0));
 
-            LocalDateTime endLogDay = date.getDayOfMonth() == log.getEnd().getDayOfMonth() ? log.getEnd()
+            LocalDateTime endLogDay = date.getDayOfMonth() == log.getEndDateTime().getDayOfMonth() ? log.getEndDateTime()
                     : LocalDateTime.of(date, LocalTime.of(23, 59, 59));
 
             LocalDateTime beginLogHour;

@@ -80,7 +80,7 @@ public class ResourcesServiceImpl implements ResourcesService {
             LocalDateTime beginWeek = dateTime.minusDays(dateTime.getDayOfWeek().getValue() - 1);
             LocalDateTime endWeek = beginWeek.plusDays(7).minusSeconds(1);
             resourceList = getListOfResources(employeeId, beginWeek, endWeek);
-        } else if (periodOfTime.equals(PeriodOfTime.MOUNTH)) {
+        } else if (periodOfTime.equals(PeriodOfTime.MONTH)) {
 
             LocalDateTime beginMonth = dateTime.minusDays(dateTime.getDayOfMonth() - 1);
             LocalDateTime endMonth = beginMonth.plusMonths(1).minusSeconds(1);
@@ -186,8 +186,8 @@ public class ResourcesServiceImpl implements ResourcesService {
         List<Log> logsPerDay = logsRepository.findLogsByIdAndTwoPointsOfTime(employee.getId(), start, end);
 
         for (Log log : logsPerDay) {
-            LocalDateTime startResourceTime = log.getStart().isBefore(start) ? start : log.getStart();
-            LocalDateTime endResourceTime = log.getEnd().isAfter(end) ? end : log.getEnd();
+            LocalDateTime startResourceTime = log.getStartDateTime().isBefore(start) ? start : log.getStartDateTime();
+            LocalDateTime endResourceTime = log.getEndDateTime().isAfter(end) ? end : log.getEndDateTime();
 
             Site site = logsService.getSiteByUrl(log, employee);
             Resource resource = Resource.builder()
