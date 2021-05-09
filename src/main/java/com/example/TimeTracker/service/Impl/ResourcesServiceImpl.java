@@ -183,7 +183,10 @@ public class ResourcesServiceImpl implements ResourcesService {
     private List<Resource> getListOfResources(Long employeeId, LocalDateTime start, LocalDateTime end) {
         List<Resource> result = new ArrayList<>();
         Person employee = personRepository.findById(employeeId).orElseThrow();
-        List<Log> logsPerDay = logsRepository.findLogsByIdAndTwoPointsOfTime(employee.getId(), start, end);
+        List<Log> logsPerDay = logsRepository.findLogsByIdAndTwoPointsOfTime(employee.getId(), start, end)
+                .stream()
+                .filter(log -> log.getEndDateTime() != null)
+                .collect(Collectors.toList());
 
         for (Log log : logsPerDay) {
             LocalDateTime startResourceTime = log.getStartDateTime().isBefore(start) ? start : log.getStartDateTime();

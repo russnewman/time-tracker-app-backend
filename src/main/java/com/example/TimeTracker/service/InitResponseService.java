@@ -39,6 +39,7 @@ public class InitResponseService {
                     .stream()
                     .map(Person::toPersonInfo)
                     .collect(Collectors.toList());
+                    employees.add(personRepository.findById(userDetails.getId()).orElseThrow().toPersonInfo());
 
             return InitResponse.builder()
                     .personInfo(personInfo)

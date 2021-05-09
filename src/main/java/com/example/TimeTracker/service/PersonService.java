@@ -101,6 +101,8 @@ public class PersonService {
                 .stream()
                 .map(Person::toPersonInfo)
                 .collect(Collectors.toList());
+        PersonInfo manager = personRepository.findById(userId).orElseThrow().toPersonInfo();
+        employees.add(manager);
         return employees;
     }
 

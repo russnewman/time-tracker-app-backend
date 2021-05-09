@@ -18,6 +18,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -59,7 +60,9 @@ public class EfficiencyServiceImpl implements EfficiencyService {
         LocalDateTime beginOfTheDay = getBeginOfTheDay(date);
         LocalDateTime endOfTheDay = getEndOfTheDay(date);
 
-        List<Log> logsPerDay = logsRepository.findLogsByIdAndTwoPointsOfTime(person.getId(), beginOfTheDay, endOfTheDay);
+        List<Log> logsPerDay = logsRepository.findLogsByIdAndTwoPointsOfTime(person.getId(), beginOfTheDay, endOfTheDay).stream()
+                .filter(log -> log.getEndDateTime() != null)
+                .collect(Collectors.toList());
 
         int[] effective = new int[24];
         int[] neutral = new int[24];
@@ -117,7 +120,7 @@ public class EfficiencyServiceImpl implements EfficiencyService {
 
         HashMap<Long, HashMap<String,HashMap<Category, int[]>>> result = new HashMap<>();
         List<Person> employees = personRepository.findAllByManagerId(userId);
-//        employees.add(personRepository.findById(userId).orElseThrow());
+        employees.add(personRepository.findById(userId).orElseThrow());
 
         employees.forEach((employee) -> {
                     result.put(employee.getId(), computeEfficiencyEmployee(employee.getId(), date, periodOfTime));
