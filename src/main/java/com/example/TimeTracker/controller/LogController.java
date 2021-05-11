@@ -57,6 +57,12 @@ public class LogController {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
         LocalDateTime startDateTime = LocalDateTime.parse(logRequest.getStartDateTime(), formatter);
 
+        Log logExists = logsRepository.findFirstByUserAndStartDateTime(user, startDateTime);
+        if (logExists != null) {
+            assert logExists.getUrl().equals(logRequest.getUrl());
+            return ResponseEntity.ok("");
+        }
+
         Log log = Log.builder()
                 .user(user)
                 .browser(logRequest.getBrowser())
