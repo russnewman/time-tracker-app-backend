@@ -15,6 +15,7 @@ public interface LogsRepository extends JpaRepository<Log, Long> {
     List<Log> findByUserAndStartDateTimeBetween(Person user, LocalDateTime start, LocalDateTime end);
 
     Log findFirstByUserAndStartDateTimeBeforeOrderByStartDateTimeDesc(Person user, LocalDateTime dateTime);
+    Log findFirstByUserAndStartDateTime(Person user, LocalDateTime dateTime);
 
     @Query(value = "" +
             "SELECT * FROM logs l " +
