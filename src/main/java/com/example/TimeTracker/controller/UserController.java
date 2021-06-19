@@ -27,6 +27,10 @@ public class UserController {
 
     @GetMapping("/getEmployees")
     public ResponseEntity<?> getEmployees(@RequestParam Long userId){
+//        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
+//                .getPrincipal();
+//        String username = userDetails.getUsername();
+//        System.out.println(username);
         return ResponseEntity.ok(personService.getEmployees(userId));
     }
 
@@ -44,7 +48,7 @@ public class UserController {
     public ResponseEntity<?> updateUserInfo(@RequestBody PersonInfo personInfo){
         try {
             personService.updateInfo(personInfo);
-            return ResponseEntity.ok("Updated successfully!");
+            return ResponseEntity.ok("Информация обновлена!");
         } catch (UserAlreadyExistException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -54,7 +58,7 @@ public class UserController {
     public ResponseEntity<?> updateUserPassword(@RequestBody UpdatePasswordRequest updatePasswordRequest){
         try {
             personService.updatePassword(updatePasswordRequest);
-            return ResponseEntity.ok("The password was successfully updated!");
+            return ResponseEntity.ok("Пароль был успешно изменен!");
         } catch (IncorrectPasswordException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -63,7 +67,7 @@ public class UserController {
     @PostMapping("/update/employee")
     public ResponseEntity<?> updateEmployee(@RequestBody PersonInfo personInfo){
         personService.updateEmployee(personInfo);
-        return ResponseEntity.ok("Updated successfully!");
+        return ResponseEntity.ok("Информация успешно обновлена!");
     }
 
 
@@ -71,7 +75,7 @@ public class UserController {
     public ResponseEntity<?> deleteEmployee(@RequestBody JsonNode body){
         Long employeeId = body.get("employeeId").asLong();
         personService.deleteEmployee(employeeId);
-        return ResponseEntity.ok("Deleted successfully!");
+        return ResponseEntity.ok("Успешно удалено!");
     }
 
     @PostMapping("/addManager")
@@ -79,13 +83,13 @@ public class UserController {
         Long userId = body.get("userId").asLong();
         Long managerId = body.get("managerId").asLong();
         personService.addOrDeleteManager(userId, managerId);
-        return ResponseEntity.ok("Add successfully!");
+        return ResponseEntity.ok("Запись упешно добавлена!");
     }
 
     @PostMapping("/deleteManager")
     public ResponseEntity<?> deleteManager(@RequestBody JsonNode body){
         Long userId = body.get("userId").asLong();
         personService.addOrDeleteManager(userId, null);
-        return ResponseEntity.ok("Deleted successfully!");
+        return ResponseEntity.ok("Удалено успешно!");
     }
 }

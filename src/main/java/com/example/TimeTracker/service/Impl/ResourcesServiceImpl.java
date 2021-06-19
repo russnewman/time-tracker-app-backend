@@ -39,6 +39,8 @@ public class ResourcesServiceImpl implements ResourcesService {
     @Override
     public Map<String, List<Resource>> getResourcesForAllTeam(Long userId, LocalDate date, PeriodOfTime periodOfTime) {
 
+        ResourceCache.clear();
+        EfficiencyCache.clear();
         List<Person> employees = personRepository.findAllByManagerId(userId);
         employees.add(personRepository.findById(userId).orElseThrow());
 
@@ -139,7 +141,7 @@ public class ResourcesServiceImpl implements ResourcesService {
     public void changeCategory(Long employeeId, String host, Category category) {
         Person person = personRepository.findById(employeeId).orElseThrow();
         Cache.evict(person.getEmail());
-        Site site = siteRepository.findByHostAndPerson(host, person).orElseThrow();
+        Site site = siteRepository.findFirstByHostAndPerson(host, person).orElseThrow();
         site.setCategory(category);
         siteRepository.save(site);
     }
@@ -147,7 +149,7 @@ public class ResourcesServiceImpl implements ResourcesService {
     @Override
     public void addResourceWithCategory(Long employeeId, String url, Category category) {
         Person person = personRepository.findById(employeeId).orElseThrow();
-        Optional<Site> optSite = siteRepository.findByHostAndPerson(Utils.extractResourceName(url), person);
+        Optional<Site> optSite = siteRepository.findFirstByHostAndPerson(Utils.extractResourceName(url), person);
         optSite.ifPresentOrElse(
                 site -> {
                     site.setCategory(category);
@@ -185,7 +187,8 @@ public class ResourcesServiceImpl implements ResourcesService {
         Person employee = personRepository.findById(employeeId).orElseThrow();
         List<Log> logsPerDay = logsRepository.findLogsByIdAndTwoPointsOfTime(employee.getId(), start, end)
                 .stream()
-                .filter(log -> log.getEndDateTime() != null)
+                .filter(log -> log.getEndDateTime() != null
+                        && log.getEndDateTime().minusSeconds(1).isAfter(log.getStartDateTime()))
                 .collect(Collectors.toList());
 
         for (Log log : logsPerDay) {

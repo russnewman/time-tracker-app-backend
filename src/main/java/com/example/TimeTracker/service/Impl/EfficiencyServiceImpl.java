@@ -51,6 +51,7 @@ public class EfficiencyServiceImpl implements EfficiencyService {
     public HashMap<Category, int[]> computeEfficiencyByUserAndDateViaLogs(Person person, LocalDate date){
 
         String key = "eff" + person.getEmail() + date.toString();
+//        EfficiencyCache.evict("effalekseenko.md@phystech.edu2021-05-14");
         if (EfficiencyCache.isCached(key)){
             return EfficiencyCache.getByKey(key);
         }
@@ -118,6 +119,8 @@ public class EfficiencyServiceImpl implements EfficiencyService {
     @Override
     public HashMap<Long, HashMap<String, HashMap<Category, int[]>>> computeEfficiencyAllTeam(Long userId, LocalDate date, PeriodOfTime periodOfTime) {
 
+        ResourceCache.clear();
+        EfficiencyCache.clear();
         HashMap<Long, HashMap<String,HashMap<Category, int[]>>> result = new HashMap<>();
         List<Person> employees = personRepository.findAllByManagerId(userId);
         employees.add(personRepository.findById(userId).orElseThrow());

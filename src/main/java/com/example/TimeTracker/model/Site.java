@@ -32,7 +32,4 @@ public class Site {
     @JoinColumn(name = "user_id")
     private Person person;
 
-//    @ManyToMany(mappedBy = "sites")
-//    private List<Person> users;
-
 }

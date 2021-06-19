@@ -25,6 +25,10 @@ public class Cache {
         return cache.containsKey(key);
     }
 
+    public static void clear(){
+        cache.clear();
+    }
+
     public static void evict(String key){
 
         Set<String> keys = cache.keySet()

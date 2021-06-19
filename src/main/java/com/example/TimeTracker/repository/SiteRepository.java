@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface SiteRepository extends JpaRepository<Site, Long> {
-    Optional<Site> findByHostAndPerson(String host, Person person);
+    Optional<Site> findFirstByHostAndPerson(String host, Person person);
     List<Site> findAllByPerson(Person person);
 //    ListSite findByResourceName(String url);
 }

@@ -22,7 +22,7 @@ public class LogsServiceImpl implements LogsService {
 
 
     public Site getSiteByUrl(Log log, Person person){
-        return siteRepository.findByHostAndPerson(Utils.extractResourceName(log.getUrl()), person)
+        return siteRepository.findFirstByHostAndPerson(Utils.extractResourceName(log.getUrl()), person)
                 .orElseGet(() -> {
                             Site site1 = Site.builder()
                                     .category(Category.WITHOUT)
