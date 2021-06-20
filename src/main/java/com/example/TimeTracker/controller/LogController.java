@@ -1,8 +1,13 @@
 package com.example.TimeTracker.controller;
 
+import com.example.TimeTracker.dto.LogMetaRequest;
 import com.example.TimeTracker.dto.LogRequest;
 import com.example.TimeTracker.model.Log;
+import com.example.TimeTracker.model.LogKeyword;
+import com.example.TimeTracker.model.LogMeta;
 import com.example.TimeTracker.model.Person;
+import com.example.TimeTracker.repository.LogKeywordRepository;
+import com.example.TimeTracker.repository.LogMetaRepository;
 import com.example.TimeTracker.repository.LogsRepository;
 import com.example.TimeTracker.repository.PersonRepository;
 import com.example.TimeTracker.security.services.jwt.JwtUtils;
@@ -16,6 +21,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+import javax.persistence.EntityNotFoundException;
 
 @RestController
 @RequestMapping("/log")
@@ -23,13 +29,19 @@ import java.util.Optional;
 public class LogController {
 
     @Autowired
-    JwtUtils jwtUtils;
+    private JwtUtils jwtUtils;
 
     @Autowired
-    LogsRepository logsRepository;
+    private LogsRepository logsRepository;
 
     @Autowired
-    PersonRepository personRepository;
+    private LogMetaRepository logMetaRepository;
+
+    @Autowired
+    private LogKeywordRepository logKeywordRepository;
+
+    @Autowired
+    private PersonRepository personRepository;
 
     private Person authorize(String auth) throws HttpClientErrorException {
         String token = auth.replace("Bearer ", "");
@@ -51,7 +63,7 @@ public class LogController {
         try {
             user = authorize(auth);
         } catch (HttpClientErrorException e) {
-            return new ResponseEntity<>(e.getStatusCode());
+            return ResponseEntity.status(e.getStatusCode()).build();
         }
 
         DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
@@ -60,7 +72,7 @@ public class LogController {
         Log logExists = logsRepository.findFirstByUserAndStartDateTime(user, startDateTime);
         if (logExists != null) {
             assert logExists.getUrl().equals(logRequest.getUrl());
-            return ResponseEntity.ok("");
+            return ResponseEntity.ok().build();
         }
 
         Log log = Log.builder()
@@ -72,18 +84,18 @@ public class LogController {
                 .background(logRequest.getBackground())
                 .build();
 
-        logsRepository.save(log);
-        return ResponseEntity.ok("");
+        Log savedLog = logsRepository.save(log);
+        return ResponseEntity.ok().body(savedLog.getId());
     }
 
-    @PostMapping(value = "/setLastLogEndDateTime", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/setLastLogEndDateTime", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> setLastLogEndDateTime(@RequestBody String datetime, @RequestHeader(value = "Authorization") String auth) {
 
         Person user;
         try {
             user = authorize(auth);
         } catch (HttpClientErrorException e) {
-            return new ResponseEntity<>(e.getStatusCode());
+            return ResponseEntity.status(e.getStatusCode()).build();
         }
 
         DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
@@ -96,6 +108,52 @@ public class LogController {
             log.setEndDateTime(endDateTime);
             logsRepository.save(log);
         }
-        return ResponseEntity.ok("");
+        return ResponseEntity.ok().build();
+    }
+
+
+    @PostMapping(value = "/setMetas", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> setMetas(@RequestBody LogMetaRequest logMetaRequest, @RequestHeader(value = "Authorization") String auth) {
+
+        Person user;
+        try {
+            user = authorize(auth);
+        } catch (HttpClientErrorException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
+        }
+
+        Log log;
+        try {
+            log = logsRepository.getOne(logMetaRequest.getLogId());
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Log with such ID does not exist");
+        }
+
+        if (log.getUser() != user) {
+            return ResponseEntity.badRequest().body("This user does not have log with such ID");
+        }
+
+        for (LogMetaRequest.Meta meta : logMetaRequest.getMetas()) {
+            LogMeta logMeta = LogMeta.builder()
+                    .log(log)
+                    .name(meta.getName())
+                    .property(meta.getProperty())
+                    .content(meta.getContent())
+                    .build();
+
+            logMetaRepository.save(logMeta);
+
+            if (meta.getName() != null && meta.getName().equals("keywords")) {
+                for (String keyword : meta.getContent().split(", ")) {
+                    LogKeyword logKeyword = LogKeyword.builder()
+                            .log(log)
+                            .keyword(keyword)
+                            .build();
+                    logKeywordRepository.save(logKeyword);
+                }
+            }
+        }
+
+        return ResponseEntity.ok().build();
     }
 }

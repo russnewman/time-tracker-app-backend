@@ -30,10 +30,10 @@ public class Log {
     @Column
     private LocalDateTime endDateTime;
 
-    @Column(nullable=false)
+    @Column(nullable=false, columnDefinition="TEXT")
     private String tabName;
 
-    @Column(nullable=false, length=512)
+    @Column(nullable=false, columnDefinition="TEXT")
     private String url;
 
     @Column(nullable=false)
