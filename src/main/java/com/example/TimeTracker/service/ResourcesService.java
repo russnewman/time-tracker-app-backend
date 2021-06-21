@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface ResourcesService {
-    Map<String, List<Resource>> getResourcesForAllTeam(Long userId, LocalDate date, PeriodOfTime periodOfTime);
+    Map<String, List<Resource>> getResourcesForAllTeam(LocalDate date, PeriodOfTime periodOfTime);
     List<Resource> getResourcesForEmployee(Long employeeId, LocalDate date, PeriodOfTime periodOfTime);
     List<Resource> getResourcesWithCategoryForEmployee(Long employeeId);
 

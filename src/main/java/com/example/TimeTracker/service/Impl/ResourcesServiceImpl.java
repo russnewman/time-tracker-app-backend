@@ -10,6 +10,7 @@ import com.example.TimeTracker.model.Site;
 import com.example.TimeTracker.repository.LogsRepository;
 import com.example.TimeTracker.repository.PersonRepository;
 import com.example.TimeTracker.repository.SiteRepository;
+import com.example.TimeTracker.security.services.AuthService;
 import com.example.TimeTracker.service.LogsService;
 import com.example.TimeTracker.service.ResourcesService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,14 +32,18 @@ public class ResourcesServiceImpl implements ResourcesService {
     PersonRepository personRepository;
     @Autowired
     SiteRepository siteRepository;
+    @Autowired
+    AuthService authService;
 
     @Autowired
     LogsService logsService;
 
 
     @Override
-    public Map<String, List<Resource>> getResourcesForAllTeam(Long userId, LocalDate date, PeriodOfTime periodOfTime) {
+    public Map<String, List<Resource>> getResourcesForAllTeam(LocalDate date, PeriodOfTime periodOfTime) {
 
+
+        Long userId = authService.getUserIdFromContext();
         ResourceCache.clear();
         EfficiencyCache.clear();
         List<Person> employees = personRepository.findAllByManagerId(userId);

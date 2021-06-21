@@ -1,0 +1,40 @@
+version: '3'
+services:
+  server:
+    container_name: tt-backend
+    image: ttb
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgresqldb
+    networks:
+      - time-tracker
+    restart: always
+    
+  postgresqldb:
+    restart: always
+    container_name: postgresqldb
+    image: postgres
+    ports:
+      - 5432:5432
+    networks:
+      - time-tracker
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: time_tracker
+
+  client:
+    container_name: tt-fronted
+    image: ttf
+    depends_on:
+      - server
+    networks:
+      - time-tracker
+    restart: on-failure
+    ports:
+      - 3000:3000
+
+networks:
+  time-tracker:
+    driver: bridge

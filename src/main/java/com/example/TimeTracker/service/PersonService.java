@@ -7,6 +7,7 @@ import com.example.TimeTracker.model.Person;
 import com.example.TimeTracker.dto.UpdatePasswordRequest;
 import com.example.TimeTracker.dto.PersonInfo;
 import com.example.TimeTracker.repository.PersonRepository;
+import com.example.TimeTracker.security.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +21,9 @@ public class PersonService {
 
     @Autowired
     PersonRepository personRepository;
+
+    @Autowired
+    private AuthService authService;
 
     @Autowired
     PasswordEncoder encoder;
@@ -75,13 +79,15 @@ public class PersonService {
 
     }
 
-    public void addOrDeleteManager(Long userId, Long managerId) {
+    public void addOrDeleteManager(Long managerId) {
+        Long userId = authService.getUserIdFromContext();
         Person person = personRepository.findById(userId).orElseThrow();
         person.setManagerId(managerId);
         personRepository.save(person);
     }
 
-    public PersonInfo getUserInfo(Long userId) {
+    public PersonInfo getUserInfo() {
+        Long userId = authService.getUserIdFromContext();
         Person person = personRepository.findById(userId).orElseThrow();
         return PersonInfo.builder()
                 .id(person.getId())
@@ -96,7 +102,8 @@ public class PersonService {
                 .build();
     }
 
-    public List<PersonInfo> getEmployees(Long userId) {
+    public List<PersonInfo> getEmployees() {
+        Long userId = authService.getUserIdFromContext();
         List<PersonInfo> employees = personRepository.findAllByManagerId(userId)
                 .stream()
                 .map(Person::toPersonInfo)
@@ -106,7 +113,8 @@ public class PersonService {
         return employees;
     }
 
-    public PersonInfo getManager(Long userId) {
+    public PersonInfo getManager() {
+        Long userId = authService.getUserIdFromContext();
         Person person = personRepository.findById(userId).orElseThrow();
         if (person.getManagerId() != null) {
             return personRepository
@@ -123,7 +131,4 @@ public class PersonService {
                 .map(Person::toPersonInfo)
                 .collect(Collectors.toList());
     }
-
-
-
 }

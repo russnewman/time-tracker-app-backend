@@ -5,8 +5,6 @@ import com.example.TimeTracker.dto.PeriodOfTime;
 import com.example.TimeTracker.service.EfficiencyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -22,10 +20,9 @@ public class EfficiencyController {
     //TODO Dont take into account Many Timezones
     @GetMapping("/team")
     public ResponseEntity<?> getEfficiencyForAllTeam(
-            @RequestParam Long userId,
             @RequestParam String date,
             @RequestParam String periodOfTime){
-        return ResponseEntity.ok(efficiencyService.computeEfficiencyAllTeam(userId, LocalDate.parse(date), PeriodOfTime.of(periodOfTime)));
+        return ResponseEntity.ok(efficiencyService.computeEfficiencyAllTeam(LocalDate.parse(date), PeriodOfTime.of(periodOfTime)));
     }
 
 }

@@ -6,6 +6,7 @@ import com.example.TimeTracker.repository.LogsRepository;
 import com.example.TimeTracker.repository.PersonRepository;
 import com.example.TimeTracker.repository.SiteRepository;
 
+import com.example.TimeTracker.security.services.AuthService;
 import com.example.TimeTracker.service.EfficiencyService;
 import com.example.TimeTracker.service.LogsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,12 +33,15 @@ public class EfficiencyServiceImpl implements EfficiencyService {
     SiteRepository siteRepository;
     @Autowired
     LogsService logsService;
+    @Autowired
+    AuthService authService;
 
     private static final LocalDate staticDate = LocalDate.now();
 
     //TODO Case when log.getEnd can be null
     @Override
-    public HashMap<Category, int[]> computeEfficiencyByUserAndDate(Long userId, LocalDate date) {
+    public HashMap<Category, int[]> computeEfficiencyByUserAndDate(LocalDate date) {
+        Long userId = authService.getUserIdFromContext();
 
         //TODO Change this
 //        LocalDate currentDate = LocalDate.now();
@@ -117,8 +121,8 @@ public class EfficiencyServiceImpl implements EfficiencyService {
     }
 
     @Override
-    public HashMap<Long, HashMap<String, HashMap<Category, int[]>>> computeEfficiencyAllTeam(Long userId, LocalDate date, PeriodOfTime periodOfTime) {
-
+    public HashMap<Long, HashMap<String, HashMap<Category, int[]>>> computeEfficiencyAllTeam(LocalDate date, PeriodOfTime periodOfTime) {
+        Long userId = authService.getUserIdFromContext();
         ResourceCache.clear();
         EfficiencyCache.clear();
         HashMap<Long, HashMap<String,HashMap<Category, int[]>>> result = new HashMap<>();
@@ -140,8 +144,8 @@ public class EfficiencyServiceImpl implements EfficiencyService {
 
         if (periodOfTime.equals(PeriodOfTime.DAY)){
 
-            efficiency = computeEfficiencyByUserAndDate(employeeId, date);
-            efficiencyPreviousPeriod = computeEfficiencyByUserAndDate(employeeId, date.minusDays(1));
+            efficiency = computeEfficiencyByUserAndDate(date);
+            efficiencyPreviousPeriod = computeEfficiencyByUserAndDate(date.minusDays(1));
 
         }
         else if (periodOfTime.equals(PeriodOfTime.WEEK)) {
@@ -182,7 +186,7 @@ public class EfficiencyServiceImpl implements EfficiencyService {
         LocalDate currentDate = beginDate;
         int currentDayOfWeek = 1;
         while (currentDate.isBefore(endDate) || currentDate.isEqual(endDate)){
-            HashMap<Category, int[]> efficiencyByUserAndDate = computeEfficiencyByUserAndDate(employeeId, currentDate);
+            HashMap<Category, int[]> efficiencyByUserAndDate = computeEfficiencyByUserAndDate(currentDate);
 
             effectiveByDays[currentDayOfWeek-1] = Arrays.stream(efficiencyByUserAndDate.get(Category.EFFECTIVE)).sum();
             neutralByDays[currentDayOfWeek-1] = Arrays.stream(efficiencyByUserAndDate.get(Category.NEUTRAL)).sum();

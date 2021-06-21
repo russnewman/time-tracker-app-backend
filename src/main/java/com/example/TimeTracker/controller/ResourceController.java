@@ -21,10 +21,9 @@ public class ResourceController {
 
     @GetMapping("/team")
     public ResponseEntity<?> getSitesForAllTeam(
-            @RequestParam Long userId,
             @RequestParam String date,
             @RequestParam String periodOfTime){
-        return ResponseEntity.ok(resourcesService.getResourcesForAllTeam(userId, LocalDate.parse(date), PeriodOfTime.of(periodOfTime)));
+        return ResponseEntity.ok(resourcesService.getResourcesForAllTeam(LocalDate.parse(date), PeriodOfTime.of(periodOfTime)));
     }
 
 

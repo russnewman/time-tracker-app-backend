@@ -21,22 +21,18 @@ public class UserController {
     private PersonService personService;
 
     @GetMapping("/getUserInfo")
-    public ResponseEntity<?> getUserInfo(@RequestParam Long userId){
-        return ResponseEntity.ok(personService.getUserInfo(userId));
+    public ResponseEntity<?> getUserInfo(){
+        return ResponseEntity.ok(personService.getUserInfo());
     }
 
     @GetMapping("/getEmployees")
-    public ResponseEntity<?> getEmployees(@RequestParam Long userId){
-//        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-//                .getPrincipal();
-//        String username = userDetails.getUsername();
-//        System.out.println(username);
-        return ResponseEntity.ok(personService.getEmployees(userId));
+    public ResponseEntity<?> getEmployees(){
+        return ResponseEntity.ok(personService.getEmployees());
     }
 
     @GetMapping("/getManager")
-    public ResponseEntity<?> getManager(@RequestParam Long userId){
-        return ResponseEntity.ok(personService.getManager(userId));
+    public ResponseEntity<?> getManager(){
+        return ResponseEntity.ok(personService.getManager());
     }
 
     @GetMapping("/getAllManagers")
@@ -80,16 +76,14 @@ public class UserController {
 
     @PostMapping("/addManager")
     public ResponseEntity<?> addManager(@RequestBody JsonNode body){
-        Long userId = body.get("userId").asLong();
         Long managerId = body.get("managerId").asLong();
-        personService.addOrDeleteManager(userId, managerId);
+        personService.addOrDeleteManager(managerId);
         return ResponseEntity.ok("Запись упешно добавлена!");
     }
 
     @PostMapping("/deleteManager")
-    public ResponseEntity<?> deleteManager(@RequestBody JsonNode body){
-        Long userId = body.get("userId").asLong();
-        personService.addOrDeleteManager(userId, null);
+    public ResponseEntity<?> deleteManager(){
+        personService.addOrDeleteManager(null);
         return ResponseEntity.ok("Удалено успешно!");
     }
 }
