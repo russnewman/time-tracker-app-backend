@@ -29,7 +29,7 @@ public class LogMeta {
     @Column()
     private String property;
 
-    @Column(nullable=false, columnDefinition="TEXT")
+    @Column(columnDefinition="TEXT")
     private String content;
 
 }
