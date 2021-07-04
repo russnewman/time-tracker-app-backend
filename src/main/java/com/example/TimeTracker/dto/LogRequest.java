@@ -22,7 +22,4 @@ public class LogRequest {
 	@NotBlank
 	private String url;
 
-	@NotBlank
-	private Boolean background;
-
 }

@@ -72,7 +72,7 @@ public class LogController {
         Log logExists = logsRepository.findFirstByUserAndStartDateTime(user, startDateTime);
         if (logExists != null) {
             assert logExists.getUrl().equals(logRequest.getUrl());
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok().body(logExists.getId());
         }
 
         Log log = Log.builder()
@@ -81,7 +81,6 @@ public class LogController {
                 .startDateTime(startDateTime)
                 .tabName(logRequest.getTabName())
                 .url(logRequest.getUrl())
-                .background(logRequest.getBackground())
                 .build();
 
         Log savedLog = logsRepository.save(log);

@@ -35,7 +35,4 @@ public class Log {
 
     @Column(nullable=false, columnDefinition="TEXT")
     private String url;
-
-    @Column(nullable=false)
-    private Boolean background;
 }
