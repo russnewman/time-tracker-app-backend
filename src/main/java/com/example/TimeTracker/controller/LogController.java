@@ -69,12 +69,6 @@ public class LogController {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
         LocalDateTime startDateTime = LocalDateTime.parse(logRequest.getStartDateTime(), formatter);
 
-        Log logExists = logsRepository.findFirstByUserAndStartDateTime(user, startDateTime);
-        if (logExists != null) {
-            assert logExists.getUrl().equals(logRequest.getUrl());
-            return ResponseEntity.ok().body(logExists.getId());
-        }
-
         Log log = Log.builder()
                 .user(user)
                 .browser(logRequest.getBrowser())
@@ -82,6 +76,12 @@ public class LogController {
                 .tabName(logRequest.getTabName())
                 .url(logRequest.getUrl())
                 .build();
+
+        Log logExists = logsRepository.findFirstByUserAndStartDateTime(user, startDateTime);
+        if (logExists != null) {
+            assert logExists.getUrl().equals(logRequest.getUrl());
+            return ResponseEntity.ok().body(logExists.getId());
+        }
 
         Log savedLog = logsRepository.save(log);
         return ResponseEntity.ok().body(savedLog.getId());
@@ -143,7 +143,7 @@ public class LogController {
             logMetaRepository.save(logMeta);
 
             if (meta.getName() != null && meta.getName().equals("keywords")) {
-                for (String keyword : meta.getContent().split(", ")) {
+                for (String keyword : meta.getContent().split(",\\s*")) {
                     LogKeyword logKeyword = LogKeyword.builder()
                             .log(log)
                             .keyword(keyword)
